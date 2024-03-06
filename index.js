@@ -10,6 +10,8 @@ const path = require("path");
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const fs = require("fs")
+const pg = require('pg')
+const db = require('./db');
 
 // Morgan
 app.use(morgan("combined"));
@@ -46,7 +48,7 @@ app.get('/users', (req, res) => {
 // No 2
 app.get('/users/:name', (req, res) => {
     const name = req.params.name.toLowerCase();
-    const user = user.users.find(u => u.name.toLowerCase() === name); // perbaiki ini
+    const user = user.users.find(u => u.name.toLowerCase() === name);
     if (!user) {
         res.status(404).json({ message: 'Data user tidak ditemukan' });
     } else {
@@ -81,13 +83,14 @@ app.post("/upload", upload.single("file"), (req,res)=>{
 //   No 5
 app.put('/users/:name', (req, res) => {
   const user = users.find(u => u.name.toLowerCase() === req.params.name.toLowerCase());
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
   if (!req.body.name) {
     return res.status(400).json({ error: 'Name is required' });
   }
-  user.name = req.body.name;
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  users.splice(user);
   res.json(user);
 });
   
