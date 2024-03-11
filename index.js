@@ -10,8 +10,94 @@ const path = require("path");
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const fs = require("fs")
-const pg = require('pg')
 const db = require('./db');
+
+
+// ====================================================
+/* ---------------- */
+
+app.get("/students", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM students");
+    res.status(200).json({
+      status: "success",
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/students", async (req, res) => {
+  const { name, address } = req.body;
+  try {
+    const result = await db.query(
+      `INSERT into students (name, address) values ('${name}', '${address}')`
+    );
+    res.status(200).json({
+      status: "success",
+      message: "data berhasil dimasukan",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Update Student by ID
+app.put("/students/:id", async (req, res) => {
+  const { name, address } = req.body;
+  try {
+    const result = await db.query(
+      `UPDATE students SET name = '${name}', address = '${address}' WHERE id = ${req.params.id}`
+    );
+    res.status(200).json({
+      status: "success",
+      message: "data berhasil diperbarui",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Delete Student by ID
+app.delete("/students/:id", async (req, res) => {
+  try {
+    const result = await db.query(
+      `DELETE FROM students WHERE id = ${req.params.id}`
+    );
+    res.status(200).json({
+      status: "success",
+      message: "data berhasil dihapus",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get student by ID
+app.get("/students/:id", async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT * FROM students WHERE id = ${req.params.id}`
+    );
+    res.status(200).json({
+      status: "success",
+      data: result.rows[0],
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+/* ----------------- */
+// ====================================================
+
+
 
 // Morgan
 app.use(morgan("combined"));
@@ -26,7 +112,7 @@ app.use(cors({
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware  BODYPARSER
-app.use(express.urlencoded({extended : true}))
+// app.use(express.urlencoded({extended : true}))
 app.use(express.json());
 app.post("/login", (req, res)=>{
     const {username, password}=req.body;

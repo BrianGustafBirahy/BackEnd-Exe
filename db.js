@@ -4,8 +4,8 @@ const pool = new Pool({
   user: 'postgres',
   password: 'gustaf',
   host: 'localhost',
-  port: 5432, // default Postgres port
-  database: 'test'
+  port: 5432,
+  database: 'backend'
 });
 
 pool.connect((err, client, release) => {
@@ -25,3 +25,4 @@ pool.connect((err, client, release) => {
 module.exports = {
   query: (text, params) => pool.query(text, params)
 };
+
