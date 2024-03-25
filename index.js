@@ -12,16 +12,19 @@ const cors = require('cors')
 const fs = require("fs")
 const db = require('./db');
 
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+
 
 // ====================================================
 /* ---------------- */
 
 app.get("/students", async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM students");
+    const allStudent = await prisma.students.findMany();
     res.status(200).json({
       status: "success",
-      data: result.rows,
+      data: allStudent,
     });
   } catch (err) {
     console.error(err);
@@ -30,11 +33,17 @@ app.get("/students", async (req, res) => {
 });
 
 app.post("/students", async (req, res) => {
-  const { name, address } = req.body;
   try {
-    const result = await db.query(
-      `INSERT into students (name, address) values ('${name}', '${address}')`
-    );
+    // const result = await db.query(
+    //   `INSERT into students (name, address) values ('${name}', '${address}')`
+    // );
+    await prisma.students.create({
+      data : {
+        name : "Alice",
+        address : "Manado"
+      },
+    });
+    
     res.status(200).json({
       status: "success",
       message: "data berhasil dimasukan",
@@ -49,9 +58,10 @@ app.post("/students", async (req, res) => {
 app.put("/students/:id", async (req, res) => {
   const { name, address } = req.body;
   try {
-    const result = await db.query(
-      `UPDATE students SET name = '${name}', address = '${address}' WHERE id = ${req.params.id}`
-    );
+    await prisma.students.update({
+      where: { id: Number(req.params.id) },
+      data: { name, address },
+    });
     res.status(200).json({
       status: "success",
       message: "data berhasil diperbarui",
@@ -65,9 +75,9 @@ app.put("/students/:id", async (req, res) => {
 // Delete Student by ID
 app.delete("/students/:id", async (req, res) => {
   try {
-    const result = await db.query(
-      `DELETE FROM students WHERE id = ${req.params.id}`
-    );
+    await prisma.students.delete({
+      where: { id: Number(req.params.id) },
+    });
     res.status(200).json({
       status: "success",
       message: "data berhasil dihapus",
@@ -81,9 +91,9 @@ app.delete("/students/:id", async (req, res) => {
 // Get student by ID
 app.get("/students/:id", async (req, res) => {
   try {
-    const result = await db.query(
-      `SELECT * FROM students WHERE id = ${req.params.id}`
-    );
+    const students = await prisma.students.findUnique({
+      where: { id: Number(req.params.id) },
+    });
     res.status(200).json({
       status: "success",
       data: result.rows[0],
